@@ -2,6 +2,7 @@
 
 class ApplicationController < ActionController::API
   include Exceptions
+  include JsonResolver
 
   rescue_from Exception do |e|
     error(e)
