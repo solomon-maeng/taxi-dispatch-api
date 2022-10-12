@@ -37,5 +37,7 @@ module TaxiDispatchApi
     config.api_only = true
 
     config.active_record.schema_format = :sql
+
+    config.i18n.default_locale = :ko
   end
 end

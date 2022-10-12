@@ -1,0 +1,12 @@
+ko:
+  activerecord:
+    errors:
+      messages:
+        record_invalid: "%{errors}"
+  errors:
+    format: "%{message}"
+    messages:
+      empty: "%{attribute}에 내용을 입력해주세요"
+      taken: "이미 가입된 %{attribute}입니다"
+      invalid: "올바른 %{attribute}을 입력해주세요"
+      inclusion: "올바른 %{attribute}을 입력해주세요"
