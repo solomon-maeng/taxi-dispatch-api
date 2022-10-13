@@ -10,14 +10,28 @@ class ApplicationController < ActionController::API
 
   # 400
   # 파라미터가 잘못됨
-  rescue_from Exceptions::BadRequest, ActiveRecord::RecordInvalid, ArgumentError do |e|
-    exception_handler e, :bad_request
+  rescue_from Exceptions::BadRequest, ActiveRecord::RecordInvalid do |e|
+    if e.is_a?(ActiveRecord::RecordInvalid)
+      if e.message == '이미 가입된 이메일입니다'
+        exception_handler e, :conflict
+      else
+        exception_handler e, :bad_request
+      end
+    end
+    exception_handler e, :bad_request if e.is_a?(Exceptions::BadRequest)
   end
 
   # 400
   # 파라미터가 잘못됨
   rescue_from ActionController::ParameterMissing do |e|
     e = Exception.new("필수 파라메터가 필요합니다: #{e.param}")
+    exception_handler e, :bad_request
+  end
+
+  # 400
+  # 파라미터가 잘못됨
+  rescue_from ArgumentError do |e|
+    e = Exceptions::InvalidUserType.new("올바른 userType을 입력해주세요") if e.message.include? "user_type"
     exception_handler e, :bad_request
   end
 

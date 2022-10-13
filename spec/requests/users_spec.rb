@@ -155,8 +155,8 @@ RSpec.describe 'UsersController', type: :request do
       before { post '/users/sign-up', params: duplicate_email, headers: {} }
 
       it '409 Conflict 응답과 에러 메세지를 반환한다.' do
-        expect(response).to have_http_status(:conflict)
         expect(subject['message']).to eq '이미 가입된 이메일입니다'
+        expect(response).to have_http_status(:conflict)
       end
     end
   end
