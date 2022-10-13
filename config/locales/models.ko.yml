@@ -1,0 +1,9 @@
+ko:
+  activerecord:
+    models:
+      user: 사용자
+    attributes:
+      user:
+        email: 이메일
+        password_digest: 비밀번호
+        user_type: 유저 타입
