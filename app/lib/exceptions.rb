@@ -46,4 +46,9 @@ module Exceptions
   # 비즈니스 로직에 위배됨
   class Conflict < Error
   end
+
+  # 400
+  # 유저 타입이 불일치
+  class InvalidUserType < Error
+  end
 end

@@ -8,6 +8,7 @@ gem "rails", "~> 7.0.4"
 gem "puma", "~> 5.0"
 gem "mysql2"
 gem "bcrypt"
+gem "ununiga"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
