@@ -2,6 +2,16 @@
 
 class UsersController < ApplicationController
 
+  def sign_in
+    user = User.find_by(email: sign_in_params[:email])
+    raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요' if user.nil?
+
+    PasswordEncoder.new.decode(sign_in_params[:password], user.password_digest)
+
+  rescue ActionController::ParameterMissing
+    raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요'
+  end
+
   def sign_up
     params = sign_up_params
     raise Exceptions::BadRequest, '올바른 비밀번호를 입력해주세요' if params[:password].blank?
@@ -24,5 +34,10 @@ class UsersController < ApplicationController
   def sign_up_params
     params.require(%i(email password userType))
     params.permit(%i(email password userType))
+  end
+
+  def sign_in_params
+    params.require(%i(email password))
+    params.permit(%i(email password))
   end
 end

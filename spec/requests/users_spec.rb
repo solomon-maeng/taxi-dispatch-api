@@ -3,6 +3,42 @@
 require 'rails_helper'
 
 RSpec.describe 'UsersController', type: :request do
+  describe '#sign_in' do
+    let(:user) { create(:user) }
+
+    subject { JSON.parse(response.body) }
+
+    context '가입 이메일이 유효하지 않은 경우,' do
+      let(:invalid_email) do
+        {
+          email: Faker::Internet.unique.email,
+          password: user.password_digest
+        }
+      end
+      before { post '/users/sign-in', params: invalid_email, headers: {} }
+
+      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+        expect(response).to have_http_status(:bad_request)
+        expect(subject['message']).to eq '아이디와 비밀번호를 확인해주세요'
+      end
+    end
+
+    context '비밀번호가 유효하지 않은 경우,' do
+      let(:invalid_password) do
+        {
+          email: user.email,
+          password: Faker::Internet.password
+        }
+      end
+      before { post '/users/sign-in', params: invalid_password, headers: {} }
+
+      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+        expect(response).to have_http_status(:bad_request)
+        expect(subject['message']).to eq '아이디와 비밀번호를 확인해주세요'
+      end
+    end
+  end
+
   describe '#sign_up' do
     let(:user) { create(:user) }
 

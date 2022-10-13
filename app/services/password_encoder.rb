@@ -7,6 +7,6 @@ class PasswordEncoder
   end
 
   def decode(input_password, encoded_password)
-    raise Exceptions::BadRequest, '비밀번호가 올바르지 않습니다' unless input_password == encoded_password
+    raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요' unless input_password == encoded_password
   end
 end
