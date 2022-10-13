@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
-  post '/users/sign-up', to: 'users#sign_up'
-  post '/users/sign-in', to: 'users#sign_in'
+  namespace :users do
+    post :sign_up, path: 'sign-up'
+    post :sign_in, path: 'sign-in'
+  end
 end
