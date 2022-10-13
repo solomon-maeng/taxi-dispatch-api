@@ -22,6 +22,19 @@ class UsersController < ApplicationController
 
     json_create_success UserSerializer.new(user).serialized_json
   end
+
+  rescue_from ActiveRecord::RecordInvalid do |e|
+    if e.message == '이미 가입된 이메일입니다'
+      exception_handler e, :conflict
+    else
+      exception_handler e, :bad_request
+    end
+  end
+
+  rescue_from ArgumentError do |e|
+    e = Exceptions::BadRequest.new("올바른 userType을 입력해주세요") if e.message.include? "user_type"
+    exception_handler e, :bad_request
+  end
   
   private
   
