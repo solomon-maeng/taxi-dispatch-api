@@ -6,31 +6,23 @@ require 'shared_helper'
 RSpec.describe 'UsersController', type: :request do
   describe '#sign_in' do
     let(:user) { create(:user) }
+    let(:params) { { email: Faker::Internet.unique.email, password: Faker::Internet.password } }
+    def request
+      post '/users/sign-in', params:, headers: {}
+    end
 
     subject { JSON.parse(response.body) }
 
     context '요청 파라미터인' do
       context '이메일이 비어있다면,' do
-        let(:empty_email) do
-          {
-            email: '',
-            password: Faker::Internet.password
-          }
-        end
-        before { post '/users/sign-in', params: empty_email, headers: {} }
+        before { params[:email] = '' }
 
         it_behaves_like 'Bad Request 응답 처리', :request do
           let(:message) { '필수 파라메터가 필요합니다: email' }
         end
       end
       context '비밀번호가 비어있다면,' do
-        let(:empty_password) do
-          {
-            email: Faker::Internet.unique.email,
-            password: ''
-          }
-        end
-        before { post '/users/sign-in', params: empty_password, headers: {} }
+        before { params[:password] = '' }
 
         it_behaves_like 'Bad Request 응답 처리', :request do
           let(:message) { '필수 파라메터가 필요합니다: password' }
@@ -39,13 +31,7 @@ RSpec.describe 'UsersController', type: :request do
     end
 
     context '가입 이메일이 유효하지 않은 경우,' do
-      let(:invalid_email) do
-        {
-          email: Faker::Internet.unique.email,
-          password: user.password_digest
-        }
-      end
-      before { post '/users/sign-in', params: invalid_email, headers: {} }
+      before { params[:email] = Faker::Internet.unique.email }
 
       it_behaves_like 'Bad Request 응답 처리', :request do
         let(:message) { '아이디와 비밀번호를 확인해주세요' }
@@ -53,13 +39,7 @@ RSpec.describe 'UsersController', type: :request do
     end
 
     context '비밀번호가 유효하지 않은 경우,' do
-      let(:invalid_password) do
-        {
-          email: user.email,
-          password: Faker::Internet.password
-        }
-      end
-      before { post '/users/sign-in', params: invalid_password, headers: {} }
+      before { params[:email] = user.email }
 
       it_behaves_like 'Bad Request 응답 처리', :request do
         let(:message) { '아이디와 비밀번호를 확인해주세요' }
@@ -69,6 +49,10 @@ RSpec.describe 'UsersController', type: :request do
 
   describe '#sign_up' do
     let(:user) { create(:user) }
+    let(:params) { { email: Faker::Internet.unique.email, password: Faker::Internet.password, userType: User.user_types.keys.sample } }
+    def request
+      post '/users/sign-up', params:, headers: {}
+    end
 
     subject { JSON.parse(response.body) }
 
@@ -94,14 +78,7 @@ RSpec.describe 'UsersController', type: :request do
 
     context '요청 파라미터인' do
       context '이메일이 비어있다면,' do
-        let(:empty_email) do
-          {
-            email: '',
-            password: Faker::Internet.password,
-            userType: User.user_types.keys.sample
-          }
-        end
-        before { post '/users/sign-up', params: empty_email, headers: {} }
+        before { params[:email] = '' }
 
         it_behaves_like 'Bad Request 응답 처리', :request do
           let(:message) { '필수 파라메터가 필요합니다: email' }
@@ -109,14 +86,7 @@ RSpec.describe 'UsersController', type: :request do
       end
 
       context '비밀번호가 비어있다면,' do
-        let(:empty_password) do
-          {
-            email: Faker::Internet.unique.email,
-            password: '',
-            userType: User.user_types.keys.sample
-          }
-        end
-        before { post '/users/sign-up', params: empty_password, headers: {} }
+        before { params[:password] = '' }
 
         it_behaves_like 'Bad Request 응답 처리', :request do
           let(:message) { '필수 파라메터가 필요합니다: password' }
@@ -124,14 +94,7 @@ RSpec.describe 'UsersController', type: :request do
       end
 
       context 'user_type이 비어있다면,' do
-        let(:empty_user_type) do
-          {
-            email: Faker::Internet.unique.email,
-            password: Faker::Internet.password,
-            userType: ''
-          }
-        end
-        before { post '/users/sign-up', params: empty_user_type, headers: {} }
+        before { params[:userType] = '' }
 
         it_behaves_like 'Bad Request 응답 처리', :request do
           let(:message) { '필수 파라메터가 필요합니다: userType' }
@@ -140,14 +103,7 @@ RSpec.describe 'UsersController', type: :request do
     end
 
     context '요청 파라미터 중 이메일 형식이 잘못된 경우,' do
-      let(:invalid_email) do
-        {
-          email: 'aaa@aaa',
-          password: Faker::Internet.password,
-          userType: User.user_types.keys.sample
-        }
-      end
-      before { post '/users/sign-up', params: invalid_email, headers: {} }
+      before { params[:email] = 'aaa@aaa' }
 
       it_behaves_like 'Bad Request 응답 처리', :request do
         let(:message) { '올바른 이메일을 입력해주세요' }
@@ -155,14 +111,7 @@ RSpec.describe 'UsersController', type: :request do
     end
 
     context '요청 파라미터 중 user_type이 올바르지 않은 경우,' do
-      let(:invalid_user_type) do
-        {
-          email: Faker::Internet.unique.email,
-          password: Faker::Internet.password,
-          userType: 'foo'
-        }
-      end
-      before { post '/users/sign-up', params: invalid_user_type, headers: {} }
+      before { params[:userType] = 'foo' }
 
       it_behaves_like 'Bad Request 응답 처리', :request do
         let(:message) { '올바른 userType을 입력해주세요' }
@@ -170,14 +119,7 @@ RSpec.describe 'UsersController', type: :request do
     end
 
     context '요청 파라미터로 기입된 이메일이 이미 가입된 경우,' do
-      let(:duplicate_email) do
-        {
-          email: user.email,
-          password: Faker::Internet.password,
-          userType: User.user_types.keys.sample
-        }
-      end
-      before { post '/users/sign-up', params: duplicate_email, headers: {} }
+      before { params[:email] = user.email }
 
       it_behaves_like 'Conflict 응답 처리', :request do
         let(:message) { '이미 가입된 이메일입니다' }
