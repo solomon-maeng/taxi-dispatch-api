@@ -8,6 +8,26 @@ RSpec.describe 'UsersController', type: :request do
 
     subject { JSON.parse(response.body) }
 
+    context '요청 파라미터가 유효한 경우,' do
+      let(:valid_params) do
+        {
+          email: 'msolo021015@gmail.com',
+          password: Faker::Internet.password,
+          userType: 'passenger'
+        }
+      end
+      before { post '/users/sign-up', params: valid_params, headers: {} }
+
+      it '새로운 사용자를 생성한다.' do
+        expect(response).to have_http_status(:created)
+        expect(subject['email']).to eq 'msolo021015@gmail.com'
+        expect(subject['id']).to_not be_nil
+        expect(subject['userType']).to eq 'passenger'
+        expect(subject['createdAt']).to_not be_nil
+        expect(subject['updatedAt']).to_not be_nil
+      end
+    end
+
     context '요청 파라미터 중 이메일 형식이 잘못된 경우,' do
       let(:invalid_email) do
         {
