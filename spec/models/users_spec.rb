@@ -24,7 +24,7 @@ RSpec.describe User, type: :model do
 
   describe '유저 모델의 user_type 일치 여부를 검증한다.' do
     it do
-      is_expected.to define_enum_for(:user_type).with_values(PASSENGER: 'passenger', DRIVER: 'driver')
+      is_expected.to define_enum_for(:user_type).with_values(passenger: 'passenger', driver: 'driver')
                                                 .backed_by_column_of_type(:string)
     end
   end
