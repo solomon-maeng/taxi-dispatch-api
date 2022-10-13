@@ -10,7 +10,14 @@ class ApplicationController < ActionController::API
 
   # 400
   # 파라미터가 잘못됨
-  rescue_from Exceptions::BadRequest, ActiveRecord::RecordInvalid, ActionController::ParameterMissing, ArgumentError do |e|
+  rescue_from Exceptions::BadRequest, ActiveRecord::RecordInvalid, ArgumentError do |e|
+    exception_handler e, :bad_request
+  end
+
+  # 400
+  # 파라미터가 잘못됨
+  rescue_from ActionController::ParameterMissing do |e|
+    e = Exception.new("필수 파라메터가 필요합니다: #{e.param}")
     exception_handler e, :bad_request
   end
 
