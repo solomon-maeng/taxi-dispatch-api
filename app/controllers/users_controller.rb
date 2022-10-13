@@ -7,9 +7,6 @@ class UsersController < ApplicationController
     raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요' if user.nil?
 
     PasswordEncoder.new.decode(sign_in_params[:password], user.password_digest)
-
-  rescue ActionController::ParameterMissing
-    raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요'
   end
 
   def sign_up

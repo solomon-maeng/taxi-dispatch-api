@@ -8,6 +8,37 @@ RSpec.describe 'UsersController', type: :request do
 
     subject { JSON.parse(response.body) }
 
+    context '요청 파라미터인' do
+      context '이메일이 비어있다면,' do
+        let(:empty_email) do
+          {
+            email: '',
+            password: Faker::Internet.password
+          }
+        end
+        before { post '/users/sign-in', params: empty_email, headers: {} }
+
+        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+          expect(response).to have_http_status(:bad_request)
+          expect(subject['message']).to eq '필수 파라메터가 필요합니다: email'
+        end
+      end
+      context '비밀번호가 비어있다면,' do
+        let(:empty_password) do
+          {
+            email: Faker::Internet.unique.email,
+            password: ''
+          }
+        end
+        before { post '/users/sign-in', params: empty_password, headers: {} }
+
+        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+          expect(response).to have_http_status(:bad_request)
+          expect(subject['message']).to eq '필수 파라메터가 필요합니다: password'
+        end
+      end
+    end
+
     context '가입 이메일이 유효하지 않은 경우,' do
       let(:invalid_email) do
         {
