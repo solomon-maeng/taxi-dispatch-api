@@ -2,7 +2,7 @@
 
 class TokenGenerator
 
-  def generate(payload, exp = 2.hours)
+  def generate(payload, exp = 2.hours.from_now)
     payload[:exp] = exp.to_i
     JWT.encode(payload, secret_key)
   end
