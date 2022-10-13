@@ -64,6 +64,54 @@ RSpec.describe 'UsersController', type: :request do
       end
     end
 
+    context '요청 파라미터인' do
+      context '이메일이 비어있다면,' do
+        let(:empty_email) do
+          {
+            email: '',
+            password: Faker::Internet.password,
+            userType: User.user_types.keys.sample
+          }
+        end
+        before { post '/users/sign-up', params: empty_email, headers: {} }
+
+        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+          expect(response).to have_http_status(:bad_request)
+          expect(subject['message']).to eq '필수 파라메터가 필요합니다: email'
+        end
+      end
+      context '비밀번호가 비어있다면,' do
+        let(:empty_password) do
+          {
+            email: Faker::Internet.unique.email,
+            password: '',
+            userType: User.user_types.keys.sample
+          }
+        end
+        before { post '/users/sign-up', params: empty_password, headers: {} }
+
+        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+          expect(response).to have_http_status(:bad_request)
+          expect(subject['message']).to eq '필수 파라메터가 필요합니다: password'
+        end
+      end
+      context 'user_type이 비어있다면,' do
+        let(:empty_user_type) do
+          {
+            email: Faker::Internet.unique.email,
+            password: Faker::Internet.password,
+            userType: ''
+          }
+        end
+        before { post '/users/sign-up', params: empty_user_type, headers: {} }
+
+        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
+          expect(response).to have_http_status(:bad_request)
+          expect(subject['message']).to eq '필수 파라메터가 필요합니다: userType'
+        end
+      end
+    end
+
     context '요청 파라미터 중 이메일 형식이 잘못된 경우,' do
       let(:invalid_email) do
         {
