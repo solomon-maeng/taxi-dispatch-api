@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  db:
+    platform: linux/amd64
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: taxi_dispatch
+      MYSQL_ROOT_PASSWORD: pass
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../db/mysql/data:/var/lib/mysql
+      - ../db/mysql/config:/etc/mysql/conf.d
+      - ../db/mysql/init:/docker-entrypoint-initdb.d
