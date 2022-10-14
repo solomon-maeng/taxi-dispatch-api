@@ -9,6 +9,7 @@ gem "puma", "~> 5.0"
 gem "mysql2"
 gem "bcrypt"
 gem "ununiga"
+gem "jwt"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
