@@ -7,6 +7,8 @@ class UsersController < ApplicationController
     raise Exceptions::BadRequest, '아이디와 비밀번호를 확인해주세요' if user.nil?
 
     PasswordEncoder.new.decode(sign_in_params[:password], user.password_digest)
+
+    json_success(accessToken: TokenGenerator.new.generate(user_id: user.id))
   end
 
   def sign_up

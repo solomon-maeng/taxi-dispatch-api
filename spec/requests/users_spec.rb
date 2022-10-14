@@ -13,6 +13,20 @@ RSpec.describe 'UsersController', type: :request do
 
     subject { JSON.parse(response.body) }
 
+    context '요청 파라미터가 유효한 경우,' do
+      let(:valid_params) do
+        {
+          email: user.email,
+          password: user.password_digest
+        }
+      end
+      before { post '/users/sign-in', params: valid_params, headers: {} }
+
+      it '사용자가 로그인에 성공하고 accessToken이 반환된다.' do
+        expect(subject['accessToken']).to_not be_nil
+      end
+    end
+
     context '요청 파라미터인' do
       context '이메일이 비어있다면,' do
         before { params[:email] = '' }
