@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'shared_helper'
 
 RSpec.describe 'UsersController', type: :request do
   describe '#sign_in' do
@@ -18,9 +19,8 @@ RSpec.describe 'UsersController', type: :request do
         end
         before { post '/users/sign-in', params: empty_email, headers: {} }
 
-        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-          expect(response).to have_http_status(:bad_request)
-          expect(subject['message']).to eq '필수 파라메터가 필요합니다: email'
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: email' }
         end
       end
       context '비밀번호가 비어있다면,' do
@@ -32,9 +32,8 @@ RSpec.describe 'UsersController', type: :request do
         end
         before { post '/users/sign-in', params: empty_password, headers: {} }
 
-        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-          expect(response).to have_http_status(:bad_request)
-          expect(subject['message']).to eq '필수 파라메터가 필요합니다: password'
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: password' }
         end
       end
     end
@@ -48,9 +47,8 @@ RSpec.describe 'UsersController', type: :request do
       end
       before { post '/users/sign-in', params: invalid_email, headers: {} }
 
-      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-        expect(response).to have_http_status(:bad_request)
-        expect(subject['message']).to eq '아이디와 비밀번호를 확인해주세요'
+      it_behaves_like 'Bad Request 응답 처리', :request do
+        let(:message) { '아이디와 비밀번호를 확인해주세요' }
       end
     end
 
@@ -63,9 +61,8 @@ RSpec.describe 'UsersController', type: :request do
       end
       before { post '/users/sign-in', params: invalid_password, headers: {} }
 
-      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-        expect(response).to have_http_status(:bad_request)
-        expect(subject['message']).to eq '아이디와 비밀번호를 확인해주세요'
+      it_behaves_like 'Bad Request 응답 처리', :request do
+        let(:message) { '아이디와 비밀번호를 확인해주세요' }
       end
     end
   end
@@ -106,11 +103,11 @@ RSpec.describe 'UsersController', type: :request do
         end
         before { post '/users/sign-up', params: empty_email, headers: {} }
 
-        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-          expect(response).to have_http_status(:bad_request)
-          expect(subject['message']).to eq '필수 파라메터가 필요합니다: email'
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: email' }
         end
       end
+
       context '비밀번호가 비어있다면,' do
         let(:empty_password) do
           {
@@ -121,11 +118,11 @@ RSpec.describe 'UsersController', type: :request do
         end
         before { post '/users/sign-up', params: empty_password, headers: {} }
 
-        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-          expect(response).to have_http_status(:bad_request)
-          expect(subject['message']).to eq '필수 파라메터가 필요합니다: password'
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: password' }
         end
       end
+
       context 'user_type이 비어있다면,' do
         let(:empty_user_type) do
           {
@@ -136,9 +133,8 @@ RSpec.describe 'UsersController', type: :request do
         end
         before { post '/users/sign-up', params: empty_user_type, headers: {} }
 
-        it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-          expect(response).to have_http_status(:bad_request)
-          expect(subject['message']).to eq '필수 파라메터가 필요합니다: userType'
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: userType' }
         end
       end
     end
@@ -153,9 +149,8 @@ RSpec.describe 'UsersController', type: :request do
       end
       before { post '/users/sign-up', params: invalid_email, headers: {} }
 
-      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-        expect(response).to have_http_status(:bad_request)
-        expect(subject['message']).to eq '올바른 이메일을 입력해주세요'
+      it_behaves_like 'Bad Request 응답 처리', :request do
+        let(:message) { '올바른 이메일을 입력해주세요' }
       end
     end
 
@@ -169,9 +164,8 @@ RSpec.describe 'UsersController', type: :request do
       end
       before { post '/users/sign-up', params: invalid_user_type, headers: {} }
 
-      it '400 BadRequest 응답과 에러 메세지를 반환한다.' do
-        expect(response).to have_http_status(:bad_request)
-        expect(subject['message']).to eq '올바른 userType을 입력해주세요'
+      it_behaves_like 'Bad Request 응답 처리', :request do
+        let(:message) { '올바른 userType을 입력해주세요' }
       end
     end
 
@@ -185,9 +179,8 @@ RSpec.describe 'UsersController', type: :request do
       end
       before { post '/users/sign-up', params: duplicate_email, headers: {} }
 
-      it '409 Conflict 응답과 에러 메세지를 반환한다.' do
-        expect(subject['message']).to eq '이미 가입된 이메일입니다'
-        expect(response).to have_http_status(:conflict)
+      it_behaves_like 'Conflict 응답 처리', :request do
+        let(:message) { '이미 가입된 이메일입니다' }
       end
     end
   end
