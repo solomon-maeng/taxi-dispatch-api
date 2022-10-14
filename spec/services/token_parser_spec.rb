@@ -16,6 +16,17 @@ RSpec.describe TokenParser, type: :service do
       end
     end
 
+    context '인자로 전달된 token이 이미 만료된 경우,' do
+      let(:expired_token) { 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0NjQxMTAzNDU5LCJleHAiOjE2MDk0MzQwMDB9.IDq_o0AvfV9vMZJfnLhNetdiXtxWTwAYpesG-v5fCLw' }
+
+      it '예외가 발생한다.' do
+        sut = described_class.new
+
+        expect { sut.parse(expired_token) }
+          .to raise_error(Exceptions::Unauthorized)
+      end
+    end
+
     context '인자로 전달된 token이 유효한 경우,' do
       let(:user_id) { Faker::Number.number }
 

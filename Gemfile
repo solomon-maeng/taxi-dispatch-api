@@ -43,6 +43,7 @@ group :development, :test do
   gem 'rubocop', require: false # Ruby static code analyzer
   gem 'rubocop-rails', require: false # rubocop extensions for rails convention
   gem 'shoulda-matchers'
+  gem 'timecop'
 end
 
 group :development do
