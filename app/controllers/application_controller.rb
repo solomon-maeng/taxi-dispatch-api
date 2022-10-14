@@ -55,4 +55,10 @@ class ApplicationController < ActionController::API
     render json: { message: '현재 요청사항을 처리할 수 없습니다. 잠시 후 다시 시도해주세요' }, status: :internal_server_error
   end
 
+  private
+
+  def authenticate_request
+    TokenExtractor.new.extract(request.headers['Token'])
+  end
+
 end
