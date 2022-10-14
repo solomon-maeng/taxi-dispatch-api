@@ -60,8 +60,12 @@ class ApplicationController < ActionController::API
   private
 
   def authenticate_request
+    # TODO 아래 로직의 책임을 적절한 객체에게 위임하도록 추후 수정
     token = TokenExtractor.new.extract(request.headers[AUTHORIZATION_HEADER])
-    TokenParser.new.parse(token)
+    result = TokenParser.new.parse(token)
+    user = User.find(id: result['user_id'])
+  rescue ActiveRecord::RecordNotFound
+    raise Exceptions::NotFound, "존재하지 않는 회원입니다" if user.nil?
   end
 
 end
