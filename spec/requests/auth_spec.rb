@@ -9,7 +9,7 @@ RSpec.describe 'ApplicationController', type: :request do
 
   describe '#authenticate_request' do
     let(:header) {}
-    before { get '/taxi-requests', params: {}, headers: header }
+    before { get '/users/me', params: {}, headers: header }
 
     context 'HTTP Header에 토큰이 없는 경우,' do
 
@@ -37,6 +37,20 @@ RSpec.describe 'ApplicationController', type: :request do
 
         it_behaves_like 'Not found 응답 처리', :request do
           let(:message) { '존재하지 않는 회원입니다' }
+        end
+      end
+    end
+
+    context 'HTTP Header에 전달한 토큰이 정상적이고,' do
+      let(:user) { create(:user) }
+      let(:token) { TokenGenerator.new.generate(user_id: user.id) }
+
+      context '사용자의 정보 조회가 성공하면' do
+        let(:header) { { 'Authorization' => "Token #{token}" } }
+
+        it '200 응답과 함께 사용자 정보가 반환된다.' do
+          expect(response).to have_http_status(:ok)
+          expect(subject['id']).to_not be_nil
         end
       end
     end

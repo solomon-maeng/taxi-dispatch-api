@@ -4,6 +4,10 @@ class ApplicationController < ActionController::API
   include Exceptions
   include JsonResolver
 
+  before_action :authenticate_request
+
+  attr_reader :current_user
+
   rescue_from Exception do |e|
     error(e)
   end
@@ -55,17 +59,12 @@ class ApplicationController < ActionController::API
     render json: { message: '현재 요청사항을 처리할 수 없습니다. 잠시 후 다시 시도해주세요' }, status: :internal_server_error
   end
 
-  AUTHORIZATION_HEADER = 'Authorization'
-
   private
 
+  AUTHORIZATION_HEADER = 'Authorization'
+
   def authenticate_request
-    # TODO 아래 로직의 책임을 적절한 객체에게 위임하도록 추후 수정
-    token = TokenExtractor.new.extract(request.headers[AUTHORIZATION_HEADER])
-    result = TokenParser.new.parse(token)
-    user = User.find(id: result['user_id'])
-  rescue ActiveRecord::RecordNotFound
-    raise Exceptions::NotFound, "존재하지 않는 회원입니다" if user.nil?
+    @current_user = AuthenticateRequestProcessor.new.authenticate(request.headers[AUTHORIZATION_HEADER])
   end
 
 end
