@@ -20,9 +20,15 @@ RSpec.describe 'TaxiRequestsController', type: :request do
         let(:header) { { 'Authorization' => "Token #{token}" } }
 
         it '자신이 요청한 배차 요청만 조회가 가능하다.' do
+          after_date_time = DateTime.parse subject[0]['createdAt']
+          before_date_time = DateTime.parse subject[1]['createdAt']
+
+          expect(after_date_time.after?(before_date_time)).to eq true
           expect(response).to have_http_status(:ok)
           expect(subject.size).to eq 10
-          expect(subject[0]['passengerId']).to eq passenger_user.id
+          subject.each do |data|
+            expect(data['passengerId']).to eq passenger_user.id
+          end
         end
       end
 
@@ -31,6 +37,10 @@ RSpec.describe 'TaxiRequestsController', type: :request do
         let(:header) { { 'Authorization' => "Token #{token}" } }
 
         it '모든 배차 요청 조회가 가능하다.' do
+          after_date_time = DateTime.parse subject[0]['createdAt']
+          before_date_time = DateTime.parse subject[1]['createdAt']
+
+          expect(after_date_time.after?(before_date_time)).to eq true
           expect(response).to have_http_status(:ok)
           expect(subject.size).to eq 20
         end

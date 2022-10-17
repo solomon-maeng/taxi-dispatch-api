@@ -3,7 +3,7 @@
 class TaxiRequestsController < ApplicationController
 
   def index
-    taxi_requests = if current_user.user_type.eql? 'passenger'
+    taxi_requests = if current_user.user_type.eql? User.user_types[:passenger]
                       TaxiRequest.order(created_at: :desc).where(passenger_id: current_user.id)
                     else
                       TaxiRequest.order(created_at: :desc)
