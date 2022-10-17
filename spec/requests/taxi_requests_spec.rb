@@ -13,11 +13,11 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       let!(:taxi_requests) { create_list(:taxi_request, 10, passenger_id: passenger_user.id) }
       let!(:random_taxi_requests) { create_list(:taxi_request, 10, driver_id: driver_user.id, status: TaxiRequest.statuses.keys.sample) }
 
+      before { get '/taxi-requests', params: {}, headers: header }
+
       context 'user_type이 passenger라면,' do
         let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
         let(:header) { { 'Authorization' => "Token #{token}" } }
-
-        before { get '/taxi-requests', params: {}, headers: header }
 
         it '자신이 요청한 배차 요청만 조회가 가능하다.' do
           expect(response).to have_http_status(:ok)
@@ -30,11 +30,18 @@ RSpec.describe 'TaxiRequestsController', type: :request do
         let(:token) { TokenGenerator.new.generate(user_id: driver_user.id) }
         let(:header) { { 'Authorization' => "Token #{token}" } }
 
-        before { get '/taxi-requests', params: {}, headers: header }
-
         it '모든 배차 요청 조회가 가능하다.' do
           expect(response).to have_http_status(:ok)
           expect(subject.size).to eq 20
+        end
+      end
+
+      context '인증되지 않은 사용자가 접근하면,' do
+        let(:header) {}
+
+        it '401 UnAuthorized 에러와 함께 에러 메세지를 리턴한다.' do
+          expect(response).to have_http_status(:unauthorized)
+          expect(subject['message']).to eq '로그인이 필요합니다'
         end
       end
     end
