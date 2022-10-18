@@ -2,8 +2,11 @@ ko:
   activerecord:
     models:
       user: 사용자
+      taxi_request: 배차 요청
     attributes:
       user:
         email: 이메일
         password_digest: 비밀번호
         user_type: 유저 타입
+      taxi_request:
+        address: 주소

@@ -14,7 +14,7 @@ class ApplicationController < ActionController::API
 
   # 400
   # 파라미터가 잘못됨
-  rescue_from Exceptions::BadRequest do |e|
+  rescue_from Exceptions::BadRequest, ActiveRecord::RecordInvalid do |e|
     exception_handler e, :bad_request
   end
 

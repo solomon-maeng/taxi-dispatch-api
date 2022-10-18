@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'shared_helper'
 
 RSpec.describe 'TaxiRequestsController', type: :request do
 
@@ -49,9 +50,47 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       context '인증되지 않은 사용자가 접근하면,' do
         let(:header) {}
 
-        it '401 UnAuthorized 에러와 함께 에러 메세지를 리턴한다.' do
-          expect(response).to have_http_status(:unauthorized)
-          expect(subject['message']).to eq '로그인이 필요합니다'
+        it_behaves_like 'UnAuthorized 응답 처리', :request
+      end
+    end
+  end
+
+  describe '#create' do
+    subject { JSON.parse(response.body) }
+
+    context '승객이 배차 요청을 보내는 경우,' do
+      let(:passenger_user) { create(:user, user_type: 'passenger') }
+
+      before { post '/taxi-requests', params:, headers: header }
+
+      context '인증되지 않은 사용자가 접근하면,' do
+        let(:header) {}
+        let(:params) {}
+
+        it_behaves_like 'UnAuthorized 응답 처리', :request
+      end
+
+      context '입력 주소가 없으면,' do
+        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
+        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:params) {}
+
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '필수 파라메터가 필요합니다: address' }
+        end
+      end
+
+      context '입력 주소가 있으나 허용된 문자열 길이를 초과한 경우,' do
+        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
+        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:params) do
+          {
+            address: 'a' * 101
+          }
+        end
+
+        it_behaves_like 'Bad Request 응답 처리', :request do
+          let(:message) { '주소는 100자 이하로 입력해주세요' }
         end
       end
     end

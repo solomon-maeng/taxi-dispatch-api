@@ -6,4 +6,5 @@ Rails.application.routes.draw do
   end
 
   get '/taxi-requests', to: 'taxi_requests#index'
+  post '/taxi-requests', to: 'taxi_requests#create'
 end
