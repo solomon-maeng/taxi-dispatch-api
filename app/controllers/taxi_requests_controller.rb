@@ -14,7 +14,9 @@ class TaxiRequestsController < ApplicationController
 
   def create
     params = create_param
+    pending_request = TaxiRequest.find_by(status: TaxiRequest.statuses[:pending])
     raise Exceptions::Forbidden, '승객만 배차 요청할 수 있습니다' unless current_user.passenger?
+    raise Exceptions::Conflict, '아직 대기중인 배차 요청이 있습니다' unless pending_request.nil?
 
     TaxiRequest.create!(
       passenger_id: params[:passenger_id],

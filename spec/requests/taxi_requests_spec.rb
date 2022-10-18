@@ -61,6 +61,7 @@ RSpec.describe 'TaxiRequestsController', type: :request do
     context '승객이 배차 요청을 보내는 경우,' do
       let(:passenger_user) { create(:user, user_type: 'passenger') }
       let(:driver_user) { create(:user, user_type: 'driver') }
+      let!(:pending_request) { create(:taxi_request, passenger_id: passenger_user.id) }
 
       before { post '/taxi-requests', params:, headers: header }
 
@@ -103,6 +104,17 @@ RSpec.describe 'TaxiRequestsController', type: :request do
         it '403 Forbidden 응답과 에러 메세지가 반환된다.' do
           expect(response).to have_http_status(:forbidden)
           expect(subject['message']).to eq '승객만 배차 요청할 수 있습니다'
+        end
+      end
+
+      context '아직 대기 중인 배차 요청이 있다면,' do
+        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
+        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:params) { { address: Faker::Address.full_address } }
+
+        it '409 Conflict 응답과 에러 메세지가 반환된다.' do
+          expect(response).to have_http_status(:conflict)
+          expect(subject['message']).to eq '아직 대기중인 배차 요청이 있습니다'
         end
       end
     end
