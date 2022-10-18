@@ -9,7 +9,7 @@ RSpec.describe 'ApplicationController', type: :request do
 
   describe '#authenticate_request' do
     let(:header) {}
-    before { get '/users/me', params: {}, headers: header }
+    before { get '/taxi-requests', params: {}, headers: header }
 
     context 'HTTP Header에 토큰이 없는 경우,' do
 
@@ -47,9 +47,9 @@ RSpec.describe 'ApplicationController', type: :request do
       context '사용자의 정보 조회가 성공하면' do
         let(:header) { valid_header(user.id) }
 
-        it '200 응답과 함께 사용자 정보가 반환된다.' do
+        it '200 응답과 빈 배열이 반환된다.' do
           expect(response).to have_http_status(:ok)
-          expect(subject['id']).to_not be_nil
+          expect(subject.empty?).to eq true
         end
       end
     end

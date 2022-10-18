@@ -77,6 +77,8 @@ RSpec.describe 'TaxiRequestsController', type: :request do
           expect(subject['id']).not_to be_nil
           expect(subject['passengerId']).to eq passenger_user.id
           expect(subject['acceptedAt']).to be_nil
+          expect(subject['status']).to eq TaxiRequest.statuses[:pending]
+          expect(subject['driverId']).not_to be_nil
         end
       end
 
@@ -89,6 +91,7 @@ RSpec.describe 'TaxiRequestsController', type: :request do
 
       context '입력 주소가 없으면,' do
         let(:header) { valid_header(passenger_user.id) }
+        let(:pending_request) {}
         let(:params) {}
 
         it_behaves_like 'Bad Request 응답 처리', :request do
