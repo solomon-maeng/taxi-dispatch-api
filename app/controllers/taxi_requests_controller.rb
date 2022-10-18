@@ -3,6 +3,12 @@
 class TaxiRequestsController < ApplicationController
 
   def index
-    # 인증 인가 테스트를 위한 골격 구현 코드
+    taxi_requests = if current_user.user_type.eql? User.user_types[:passenger]
+                      TaxiRequest.order(created_at: :desc).where(passenger_id: current_user.id)
+                    else
+                      TaxiRequest.order(created_at: :desc)
+                    end
+
+    json_success taxi_requests.map { |request| TaxiRequestSerializer.new(request).serialized_json }
   end
 end
