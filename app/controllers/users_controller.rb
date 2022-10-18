@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
+  skip_before_action :authenticate_request, only: %w(sign_up sign_in)
+
+  def me
+    json_success UserSerializer.new(
+      User.find_by(id: current_user.id)
+    ).serialized_json
+  end
 
   def sign_in
     user = User.find_by(email: sign_in_params[:email])
