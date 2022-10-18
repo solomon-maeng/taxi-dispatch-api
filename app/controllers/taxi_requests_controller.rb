@@ -18,12 +18,14 @@ class TaxiRequestsController < ApplicationController
     raise Exceptions::Forbidden, '승객만 배차 요청할 수 있습니다' unless current_user.passenger?
     raise Exceptions::Conflict, '아직 대기중인 배차 요청이 있습니다' unless pending_request.nil?
 
-    TaxiRequest.create!(
+    request = TaxiRequest.create!(
       passenger_id: params[:passenger_id],
       driver_id: 0,
       address: params[:address],
       status: TaxiRequest.statuses[:pending]
     )
+
+    json_create_success TaxiRequestSerializer.new(request).serialized_json
   end
 
   private

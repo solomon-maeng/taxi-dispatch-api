@@ -65,6 +65,20 @@ RSpec.describe 'TaxiRequestsController', type: :request do
 
       before { post '/taxi-requests', params:, headers: header }
 
+      context '배차 요청이 성공하고,' do
+        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
+        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:pending_request) {}
+        let(:params) { { address: Faker::Address.full_address } }
+
+        it '생성된 배차 요청 정보를 반환한다.' do
+          expect(response).to have_http_status(:created)
+          expect(subject['id']).not_to be_nil
+          expect(subject['passengerId']).to eq passenger_user.id
+          expect(subject['acceptedAt']).to be_nil
+        end
+      end
+
       context '인증되지 않은 사용자가 접근하면,' do
         let(:header) {}
         let(:params) {}
@@ -85,6 +99,7 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       context '입력 주소가 있으나 허용된 문자열 길이를 초과한 경우,' do
         let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
         let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:pending_request) {}
         let(:params) do
           {
             address: 'a' * 101
