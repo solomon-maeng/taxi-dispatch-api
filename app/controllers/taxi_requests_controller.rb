@@ -14,6 +14,8 @@ class TaxiRequestsController < ApplicationController
 
   def create
     params = create_param
+    raise Exceptions::Forbidden, '승객만 배차 요청할 수 있습니다' unless current_user.passenger?
+
     TaxiRequest.create!(
       passenger_id: params[:passenger_id],
       driver_id: 0,
