@@ -12,6 +12,6 @@ class AuthenticateRequestProcessor
     user = User.find_by(id: result['user_id'])
     raise Exceptions::NotFound, '존재하지 않는 회원입니다' if user.nil?
 
-    AuthenticatedUser.new(user.id, user.user_type)
+    user
   end
 end
