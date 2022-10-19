@@ -132,4 +132,62 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       end
     end
   end
+
+  describe '#accept' do
+    subject { JSON.parse(response.body) }
+
+    context '기사가 배차 요청을 수락하는 경우,' do
+      let(:driver_user) { create(:user, user_type: 'driver') }
+      let(:passenger_user) { create(:user, user_type: 'passenger') }
+      let!(:taxi_request) { create(:taxi_request, passenger_id: passenger_user.id) }
+      let!(:accepted_request) { create(:taxi_request, passenger_id: passenger_user.id, status: TaxiRequest.statuses[:accepted]) }
+
+      before { post "/taxi-requests/#{taxi_request.id}/accept", params: {}, headers: header }
+
+      context '배차 요청 상태가 변경되고,' do
+        let(:header) { valid_header(driver_user.id) }
+
+        it '수락된 배차 요청 정보를 반환한다.' do
+          expect(response).to have_http_status(:ok)
+          expect(subject['id']).not_to be_nil
+          expect(subject['passengerId']).to eq passenger_user.id
+          expect(subject['driverId']).to eq driver_user.id
+          expect(subject['acceptedAt']).not_to be_nil
+          expect(subject['status']).to eq TaxiRequest.statuses[:accepted]
+        end
+      end
+
+      context '인증 정보가 유효하지 않다면,' do
+        let(:header) {}
+
+        it_behaves_like 'UnAuthorized 응답 처리', :request
+      end
+
+      context '기사가 아닌 유저가 접근한 경우,' do
+        let(:header) { valid_header(passenger_user.id) }
+
+        it_behaves_like 'Forbidden 응답 처리', :request do
+          let(:message) { '기사만 배차 요청을 수락할 수 있습니다' }
+        end
+      end
+
+      context '존재하지 않는 배차 요청이라면,' do
+        let(:header) { valid_header(driver_user.id) }
+        before { post '/taxi-requests/12/accept', params: {}, headers: header }
+
+        it_behaves_like 'Not found 응답 처리', :request do
+          let(:message) { '존재하지 않는 배차 요청입니다' }
+        end
+      end
+
+      context '이미 수락된 배차 요청일 경우,' do
+        let(:header) { valid_header(driver_user.id) }
+        before { post "/taxi-requests/#{accepted_request.id}/accept", params: {}, headers: header }
+
+        it_behaves_like 'Conflict 응답 처리', :request do
+          let(:message) { '수락할 수 없는 배차 요청입니다. 다른 배차 요청을 선택하세요' }
+        end
+      end
+    end
+  end
 end
