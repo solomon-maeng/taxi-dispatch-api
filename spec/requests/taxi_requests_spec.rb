@@ -17,12 +17,10 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       before { get '/taxi-requests', params: {}, headers: header }
 
       context 'user_type이 passenger라면,' do
-        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(passenger_user.id) }
 
         it '자신이 요청한 배차 요청만 조회가 가능하다.' do
-          after_date_time = DateTime.parse subject[0]['createdAt']
-          before_date_time = DateTime.parse subject[1]['createdAt']
+          after_date_time, before_date_time = parse_date_time
 
           expect(after_date_time.after?(before_date_time)).to eq true
           expect(response).to have_http_status(:ok)
@@ -34,12 +32,10 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       end
 
       context 'user_type이 driver라면,' do
-        let(:token) { TokenGenerator.new.generate(user_id: driver_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(driver_user.id) }
 
         it '모든 배차 요청 조회가 가능하다.' do
-          after_date_time = DateTime.parse subject[0]['createdAt']
-          before_date_time = DateTime.parse subject[1]['createdAt']
+          after_date_time, before_date_time = parse_date_time
 
           expect(after_date_time.after?(before_date_time)).to eq true
           expect(response).to have_http_status(:ok)
@@ -52,6 +48,12 @@ RSpec.describe 'TaxiRequestsController', type: :request do
 
         it_behaves_like 'UnAuthorized 응답 처리', :request
       end
+    end
+
+    def parse_date_time
+      after_date_time = DateTime.parse subject[0]['createdAt']
+      before_date_time = DateTime.parse subject[1]['createdAt']
+      [after_date_time, before_date_time]
     end
   end
 
@@ -66,8 +68,7 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       before { post '/taxi-requests', params:, headers: header }
 
       context '배차 요청이 성공하고,' do
-        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(passenger_user.id) }
         let(:pending_request) {}
         let(:params) { { address: Faker::Address.full_address } }
 
@@ -76,6 +77,8 @@ RSpec.describe 'TaxiRequestsController', type: :request do
           expect(subject['id']).not_to be_nil
           expect(subject['passengerId']).to eq passenger_user.id
           expect(subject['acceptedAt']).to be_nil
+          expect(subject['status']).to eq TaxiRequest.statuses[:pending]
+          expect(subject['driverId']).not_to be_nil
         end
       end
 
@@ -87,8 +90,8 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       end
 
       context '입력 주소가 없으면,' do
-        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(passenger_user.id) }
+        let(:pending_request) {}
         let(:params) {}
 
         it_behaves_like 'Bad Request 응답 처리', :request do
@@ -97,8 +100,7 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       end
 
       context '입력 주소가 있으나 허용된 문자열 길이를 초과한 경우,' do
-        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(passenger_user.id) }
         let(:pending_request) {}
         let(:params) do
           {
@@ -112,24 +114,20 @@ RSpec.describe 'TaxiRequestsController', type: :request do
       end
 
       context '요청 송신 사용자가 승객이 아니라면,' do
-        let(:token) { TokenGenerator.new.generate(user_id: driver_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(driver_user.id) }
         let(:params) { { address: Faker::Address.full_address } }
 
-        it '403 Forbidden 응답과 에러 메세지가 반환된다.' do
-          expect(response).to have_http_status(:forbidden)
-          expect(subject['message']).to eq '승객만 배차 요청할 수 있습니다'
+        it_behaves_like 'Forbidden 응답 처리', :request do
+          let(:message) { '승객만 배차 요청할 수 있습니다' }
         end
       end
 
       context '아직 대기 중인 배차 요청이 있다면,' do
-        let(:token) { TokenGenerator.new.generate(user_id: passenger_user.id) }
-        let(:header) { { 'Authorization' => "Token #{token}" } }
+        let(:header) { valid_header(passenger_user.id) }
         let(:params) { { address: Faker::Address.full_address } }
 
-        it '409 Conflict 응답과 에러 메세지가 반환된다.' do
-          expect(response).to have_http_status(:conflict)
-          expect(subject['message']).to eq '아직 대기중인 배차 요청이 있습니다'
+        it_behaves_like 'Conflict 응답 처리', :request do
+          let(:message) { '아직 대기중인 배차 요청이 있습니다' }
         end
       end
     end
