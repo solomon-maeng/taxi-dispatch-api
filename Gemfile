@@ -10,6 +10,7 @@ gem "mysql2"
 gem "bcrypt"
 gem "ununiga"
 gem "jwt"
+gem "coverband"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"

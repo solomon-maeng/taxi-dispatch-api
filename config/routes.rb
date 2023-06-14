@@ -7,4 +7,6 @@ Rails.application.routes.draw do
   get '/taxi-requests', to: 'taxi_requests#index'
   post '/taxi-requests', to: 'taxi_requests#create'
   post '/taxi-requests/:id/accept', to: 'taxi_requests#accept'
+
+  mount Coverband::Reporters::Web.new, at: '/coverage'
 end
